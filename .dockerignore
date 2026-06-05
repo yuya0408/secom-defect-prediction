@@ -1,0 +1,20 @@
+# データやノートブックはイメージに含めない（API 実行に不要）
+data/
+notebooks/
+reports/
+tests/
+scripts/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 環境
+.venv/
+venv/
+.git/
+.gitignore
+README.md
+sample_input.json
