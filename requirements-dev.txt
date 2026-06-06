@@ -1,0 +1,7 @@
+# 開発・テスト用の依存。API の実行（本番）には不要。
+# 先頭で本番依存を取り込むので、これ一つでテスト環境がそろう:
+#   pip install -r requirements-dev.txt
+-r requirements.txt
+
+pytest==9.0.3
+httpx==0.28.1          # FastAPI の TestClient が内部で使用する
