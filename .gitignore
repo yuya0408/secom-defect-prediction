@@ -15,3 +15,8 @@ env/
 .idea/
 .vscode/
 
+# 作業用スクリプト（ノートブックに統合済み）
+scripts/regen_fig3.py
+_extract_nb.py
+_nb_run.py
+
