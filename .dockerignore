@@ -5,6 +5,13 @@ reports/
 tests/
 scripts/
 
+# Zenn 記事まわりは推論 API に不要
+articles/
+images/
+node_modules/
+package.json
+package-lock.json
+
 # Python
 __pycache__/
 *.pyc
