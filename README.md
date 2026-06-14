@@ -11,7 +11,7 @@
 | **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
 | **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
 
-> 記事本体は [Zenn CLI](https://zenn.dev/zenn/articles/zenn-cli-guide) で管理している（`articles/` に Markdown、画像は `images/`）。執筆・公開の手順は[後述](#記事の執筆と公開zenn-cli)。
+> 記事本体は `articles/` に Markdown で置いている（図は `images/`）。Zenn で公開予定。
 
 > 予測精度を競うプロジェクトではない。「精度に限界のあるモデルでも、誰でも同じ結果を再現できる状態にする」までの一連の流れを示すことが目的。
 
@@ -150,32 +150,6 @@ pytest -q
 ```bash
 jupyter nbconvert --clear-output --inplace notebooks/secom_strict_analysis.ipynb
 ```
-
----
-
-## 記事の執筆と公開（Zenn CLI）
-
-記事は [Zenn CLI](https://zenn.dev/zenn/articles/zenn-cli-guide) で管理している。本文は `articles/<slug>.md`、画像は `images/` 配下に置き、記事からは `/images/...` の絶対パスで参照する。
-
-```bash
-# 依存（zenn-cli）のインストール
-npm install
-
-# ブラウザでプレビュー → http://localhost:8000
-npm run preview
-
-# 新しい記事を追加する場合
-npm run new:article
-```
-
-| 記事 | slug | 公開状態 |
-|------|------|------|
-| 考察編 | `secom-defect-analysis` | `published: false`（下書き） |
-| 実装編 | `secom-defect-serving` | `published: false`（下書き） |
-
-公開するときは各記事の frontmatter を `published: true` に変更し、この GitHub リポジトリを [Zenn のデプロイ連携](https://zenn.dev/zenn/articles/connect-to-github)に接続して push する。`published_at` を指定すれば予約投稿もできる。
-
-> 各記事は Notion で執筆・管理しており、確定版を `articles/` に反映している。`reports/figures/` の図を更新したときは `images/secom-defect-analysis/` 側にもコピーすること。
 
 ---
 
