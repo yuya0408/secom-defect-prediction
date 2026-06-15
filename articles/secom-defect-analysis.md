@@ -1,5 +1,5 @@
 ---
-title: "SECOMを掘り下げて分かったこと ― 半導体不良データを読み解く（考察編）"
+title: "半導体製造ラインのセンサーデータを現場感覚で読む ― 不良予測データSECOM分析"
 emoji: "🔬"
 type: "tech"
 topics: ["python", "機械学習", "データ分析", "scikitlearn", "製造業"]
