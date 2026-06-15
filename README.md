@@ -94,7 +94,6 @@ secom-defect-prediction/
 ├── Dockerfile                # 推論 API のコンテナイメージ
 ├── docker-compose.yml        # ワンコマンド起動
 ├── sample_input.json         # API 動作確認用のサンプル（実データの不良行 1 件）
-├── package.json              # Zenn CLI（記事のプレビュー・管理）
 ├── articles/                 # Zenn 記事本体（Markdown）
 │   ├── secom-defect-analysis.md  # 考察編
 │   └── secom-defect-serving.md   # 実装編
