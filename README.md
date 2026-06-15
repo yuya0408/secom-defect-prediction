@@ -6,10 +6,12 @@
 
 ## 2 部構成
 
-| 記事 | 主軸 | 対応する場所 |
-|------|------|------|
-| **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | `notebooks/`, `reports/figures/` |
-| **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | `src/`, `models/`, `Dockerfile` |
+| 記事 | 主軸 | 記事ファイル | 対応するコード |
+|------|------|------|------|
+| **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
+| **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
+
+> 記事本体は `articles/` に Markdown で置いている（図は `images/`）。Zenn で公開予定。
 
 > 予測精度を競うプロジェクトではない。「精度に限界のあるモデルでも、誰でも同じ結果を再現できる状態にする」までの一連の流れを示すことが目的。
 
@@ -92,6 +94,11 @@ secom-defect-prediction/
 ├── Dockerfile                # 推論 API のコンテナイメージ
 ├── docker-compose.yml        # ワンコマンド起動
 ├── sample_input.json         # API 動作確認用のサンプル（実データの不良行 1 件）
+├── articles/                 # Zenn 記事本体（Markdown）
+│   ├── secom-defect-analysis.md  # 考察編
+│   └── secom-defect-serving.md   # 実装編
+├── images/                   # Zenn 記事用の画像（/images/... で参照）
+│   └── secom-defect-analysis/    # 考察編の図（fig1〜fig6）
 ├── src/
 │   ├── preprocessing.py      # 前処理クラス（リーク防止 / 独立モジュール）
 │   ├── train.py              # 最終モデルの学習と保存
@@ -101,13 +108,15 @@ secom-defect-prediction/
 ├── notebooks/
 │   └── secom_strict_analysis.ipynb  # 考察編の本体（厳密版の分析）
 ├── reports/
-│   └── figures/              # 考察編の図表（fig1〜fig6）
+│   └── figures/              # 考察編の図表の生成元（fig1〜fig6）
 ├── scripts/
 │   └── make_sample_input.py  # sample_input.json をデータから生成
 ├── tests/
 │   └── test_api.py           # pytest による API テスト
 └── .github/workflows/ci.yml  # 学習 → テストの CI
 ```
+
+> `reports/figures/` は分析（ノートブック）が生成する図の置き場、`images/secom-defect-analysis/` は Zenn 記事が参照する同じ図のコピー。図を更新したら両方に反映する。
 
 ---
 

@@ -15,6 +15,9 @@ env/
 .idea/
 .vscode/
 
+# Node / Zenn CLI
+node_modules/
+
 # 作業用スクリプト（ノートブックに統合済み）
 scripts/regen_fig3.py
 _extract_nb.py
