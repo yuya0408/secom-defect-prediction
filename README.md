@@ -94,6 +94,8 @@ secom-defect-prediction/
 ├── Dockerfile                # 推論 API のコンテナイメージ
 ├── docker-compose.yml        # ワンコマンド起動
 ├── sample_input.json         # API 動作確認用のサンプル（実データの不良行 1 件）
+├── app.py                    # Gradio デモ（Hugging Face Spaces 用）
+├── MODEL_CARD.md             # Hub 公開用のモデルカード（用途・評価・限界）
 ├── articles/                 # Zenn 記事本体（Markdown）
 │   ├── secom-defect-analysis.md  # 考察編
 │   └── secom-defect-serving.md   # 実装編
@@ -160,6 +162,55 @@ curl http://localhost:8000/health
 ```
 
 イメージには `src/` と `models/` のみを含め、データ・ノートブック・図表は除外している（`.dockerignore`）。
+
+---
+
+## Hugging Face で公開する
+
+ブラウザから試せる **Gradio デモ**（`app.py`）を同梱している。推論 API（FastAPI）と
+同じ前処理クラス・モデルを共有しているため、デモと本番サービングで結果が一致する。
+
+```bash
+# ローカルで起動 → http://localhost:7860
+python app.py
+```
+
+### Spaces（Gradio）にデプロイ
+
+[Hugging Face Spaces](https://huggingface.co/spaces) を **SDK: Gradio** で新規作成し、
+Space リポジトリに本リポジトリの内容（`app.py` / `src/` / `models/` / `data/` /
+`requirements.txt`）を push する。Space の `README.md` 冒頭に次の front-matter を置く:
+
+```yaml
+---
+title: SECOM 不良予測デモ
+emoji: 🏭
+colorFrom: blue
+colorTo: gray
+sdk: gradio
+app_file: app.py
+pinned: false
+license: mit
+---
+```
+
+`data/`（約 5MB）を含めると「データから例を選んで推論」タブが使える。除外した場合は
+「JSON をアップロードして推論」タブのみ動作する。
+
+### Hub にモデルを公開する
+
+学習済みモデルを [Hub のモデルリポジトリ](https://huggingface.co/models) として公開する場合:
+
+```bash
+pip install -U "huggingface_hub[cli]"
+huggingface-cli login
+huggingface-cli upload <user>/secom-defect-model models/ . --repo-type=model
+huggingface-cli upload <user>/secom-defect-model MODEL_CARD.md README.md --repo-type=model
+```
+
+[`MODEL_CARD.md`](MODEL_CARD.md) がモデルカード（用途・厳密評価値・限界）。Hub 側を
+モデルの配布元にすれば、デモ／API は版指定（`revision`）でモデルを取得でき、
+アプリと成果物を分離した運用に発展させられる。
 
 ---
 
