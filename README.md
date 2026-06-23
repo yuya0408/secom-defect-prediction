@@ -136,7 +136,7 @@ uvicorn src.api:app --reload
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d @sample_input.json
-# => {"defect_probability": 0.6597, "is_defect": true, "threshold": 0.5}
+# => {"defect_probability": 0.6597, "is_defect": true, "threshold": 0.5, "model_version": "1.0.0"}
 
 # 5. テスト
 pytest -q

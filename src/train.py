@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timezone
 
 import joblib
 import numpy as np
@@ -32,6 +33,10 @@ MODELS_DIR = os.path.join(ROOT, "models")
 # 厳密評価（Nested CV）で得た真の実力値。ノートブックの分析結果をそのまま記録する。
 EVAL_AUC_STRICT = 0.6074
 EVAL_PR_AUC_STRICT = 0.1346
+
+# モデルの版。学習構成（前処理・アルゴリズム・ハイパラ）を変えたら手で上げる。
+# 推論レスポンスとログに刻むことで、「どの予測がどのモデルから出たか」を後から辿れる。
+MODEL_VERSION = "1.0.0"
 
 
 def load_data():
@@ -62,6 +67,8 @@ def main():
     model.fit(X, y)
 
     metadata = {
+        "version": MODEL_VERSION,
+        "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "model_type": "RandomForestClassifier",
         "n_estimators": 200,
         "max_depth": 10,
@@ -82,7 +89,7 @@ def main():
     joblib.dump(model, os.path.join(MODELS_DIR, "model.pkl"))
     joblib.dump(metadata, os.path.join(MODELS_DIR, "metadata.pkl"))
 
-    print("=== 保存完了 ===")
+    print(f"=== 保存完了（model version {metadata['version']} / {metadata['trained_at']}） ===")
     for name in ("preprocessor.pkl", "model.pkl", "metadata.pkl"):
         path = os.path.join(MODELS_DIR, name)
         print(f"  models/{name} ({os.path.getsize(path) / 1024:.1f} KB)")

@@ -51,7 +51,20 @@ def test_health():
 def test_metadata():
     r = client.get("/metadata")
     assert r.status_code == 200
-    assert r.json()["input_features"] == N_FEATURES
+    body = r.json()
+    assert body["input_features"] == N_FEATURES
+    # バージョニング: 学習スクリプトが版と学習日時を記録していること。
+    assert body.get("version")
+    assert body.get("trained_at")
+
+
+def test_prediction_carries_model_version():
+    """予測レスポンスにモデル版が刻まれ、ログから出自を辿れること。"""
+    y = _labels()
+    fail_idx = int(next(i for i, v in enumerate(y) if v == 1))
+    r = client.post("/predict", json={"features": _row(fail_idx)})
+    assert r.status_code == 200
+    assert r.json()["model_version"]
 
 
 def test_predict_returns_valid_probability():
