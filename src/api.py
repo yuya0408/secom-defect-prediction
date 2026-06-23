@@ -26,7 +26,7 @@ from typing import List, Optional
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # src.preprocessing を import しておくことが重要。
 # これにより joblib.load が pickle 内の SecomPreprocessor を復元できる。
@@ -42,6 +42,9 @@ metadata = joblib.load(os.path.join(MODELS_DIR, "metadata.pkl"))
 
 N_FEATURES = metadata["input_features"]            # 590
 DEFAULT_THRESHOLD = metadata.get("default_threshold", 0.5)
+# 古い metadata.pkl（version を持たない）でも壊れないよう get で取得する。
+MODEL_VERSION = metadata.get("version", "unknown")
+TRAINED_AT = metadata.get("trained_at")
 
 app = FastAPI(
     title="SECOM 不良予測 API",
@@ -103,14 +106,23 @@ class BatchPredictRequest(BaseModel):
 
 
 class PredictResponse(BaseModel):
+    # "model_" で始まるフィールドは pydantic v2 の保護名前空間と衝突するため明示的に解除。
+    model_config = ConfigDict(protected_namespaces=())
+
     defect_probability: float = Field(..., description="不良である確率（0〜1）。")
     is_defect: bool = Field(..., description="しきい値を超えたかどうか。")
     threshold: float = Field(..., description="判定に使ったしきい値。")
+    model_version: str = Field(
+        ..., description="この予測を出したモデルの版。ログと突合して出自を辿るために返す。"
+    )
 
 
 class BatchPredictResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     results: List[PredictResponse]
     threshold: float
+    model_version: str = Field(..., description="推論に使ったモデルの版。")
 
 
 # --- 推論ロジック -------------------------------------------------------------
@@ -130,6 +142,8 @@ def root():
         "service": "SECOM 不良予測 API",
         "version": app.version,
         "model": metadata["model_type"],
+        "model_version": MODEL_VERSION,
+        "trained_at": TRAINED_AT,
         "input_features": N_FEATURES,
         "docs": "/docs",
     }
@@ -158,6 +172,7 @@ def predict(req: PredictRequest):
         defect_probability=proba,
         is_defect=proba >= threshold,
         threshold=threshold,
+        model_version=MODEL_VERSION,
     )
 
 
@@ -173,7 +188,10 @@ def predict_batch(req: BatchPredictRequest):
             defect_probability=float(p),
             is_defect=bool(p >= threshold),
             threshold=threshold,
+            model_version=MODEL_VERSION,
         )
         for p in probas
     ]
-    return BatchPredictResponse(results=results, threshold=threshold)
+    return BatchPredictResponse(
+        results=results, threshold=threshold, model_version=MODEL_VERSION
+    )

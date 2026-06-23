@@ -17,3 +17,6 @@ httpx==0.28.1
 
 # --- ノートブックを再実行する場合のみ必要（API 実行には不要） ---
 matplotlib==3.10.8
+
+# --- Gradio デモ / Hugging Face Spaces 用（API 実行には不要） ---
+gradio==6.19.0
