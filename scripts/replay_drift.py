@@ -164,23 +164,56 @@ def _write_markdown(report: pd.DataFrame, baseline_pr_auc: float):
     print(f"書き出し: {os.path.relpath(path, ROOT)}")
 
 
+def _setup_japanese_font() -> bool:
+    """日本語フォントが使えれば matplotlib に設定する。使えなければ False。
+
+    環境に依存しないよう、見つかった場合だけ日本語ラベルにし、無い環境では英語に
+    フォールバックする（豆腐文字 □ を出さない）。
+    """
+    import matplotlib.font_manager as fm
+
+    candidates = [
+        "IPAexGothic", "IPAGothic", "IPAPGothic", "Noto Sans CJK JP",
+        "Noto Sans JP", "TakaoGothic", "VL Gothic", "Hiragino Sans",
+        "Yu Gothic", "Meiryo", "Source Han Sans JP",
+    ]
+    available = {f.name for f in fm.fontManager.ttflist}
+    for name in candidates:
+        if name in available:
+            plt.rcParams["font.family"] = name
+            plt.rcParams["axes.unicode_minus"] = False
+            return True
+    return False
+
+
 def _plot(report: pd.DataFrame):
     color = {"green": "tab:green", "yellow": "tab:orange", "red": "tab:red"}
     x = np.arange(len(report))
-    # 図のラベルは英語（日本語フォント非依存で環境を問わず崩れないようにする）。
+
+    # 日本語フォントがあれば日本語ラベル、無ければ英語にフォールバック。
+    jp = _setup_japanese_font()
+    L = {
+        "unknown": "未知グループ率" if jp else "Unknown-group rate",
+        "psi": "予測PSI" if jp else "Prediction PSI",
+        "pr_auc": "PR-AUC",
+        "ax2": "予測PSI / PR-AUC" if jp else "Prediction PSI / PR-AUC",
+        "title": ("時系列リプレイによるドリフト指標（月別）" if jp
+                  else "Drift metrics by month (time-series replay)"),
+    }
+
     fig, ax1 = plt.subplots(figsize=(8, 4.5))
     ax1.bar(x, report["unknown_group_rate"], width=0.4, align="edge",
-            color=[color[l] for l in report["level"]], label="Unknown-group rate", alpha=0.8)
-    ax1.set_ylabel("Unknown-group rate")
+            color=[color[l] for l in report["level"]], label=L["unknown"], alpha=0.8)
+    ax1.set_ylabel(L["unknown"])
     ax1.set_xticks(x + 0.2)
     ax1.set_xticklabels([f"{m}\n({l.upper()})" for m, l in zip(report["month"], report["level"])])
 
     ax2 = ax1.twinx()
-    ax2.plot(x + 0.2, report["prediction_psi"], "o-", color="navy", label="Prediction PSI")
-    ax2.plot(x + 0.2, report["pr_auc"], "s--", color="darkred", label="PR-AUC")
-    ax2.set_ylabel("Prediction PSI / PR-AUC")
+    ax2.plot(x + 0.2, report["prediction_psi"], "o-", color="navy", label=L["psi"])
+    ax2.plot(x + 0.2, report["pr_auc"], "s--", color="darkred", label=L["pr_auc"])
+    ax2.set_ylabel(L["ax2"])
 
-    ax1.set_title("Drift metrics by month (time-series replay)")
+    ax1.set_title(L["title"])
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax1.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=8)
