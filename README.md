@@ -4,12 +4,13 @@
 
 元・電子部品メーカーの製造技術職（不良改善が専門）が、現場感覚とデータ分析を掛け合わせて「このデータが何を物語っているか」を読み解いた記録。
 
-## 2 部構成
+## 3 部構成
 
 | 記事 | 主軸 | 記事ファイル | 対応するコード |
 |------|------|------|------|
 | **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
 | **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
+| **運用編**（Zenn: リンクは公開後に追記） | 動かし続けるための監視。ドリフト検知と再学習の線引き | [`articles/secom-defect-operations.md`](articles/secom-defect-operations.md) | `src/monitoring.py`, `scripts/replay_drift.py` |
 
 > 記事本体は `articles/` に Markdown で置いている（図は `images/`）。Zenn で公開予定。
 
@@ -97,10 +98,12 @@ secom-defect-prediction/
 ├── app.py                    # Gradio デモ（Hugging Face Spaces 用）
 ├── MODEL_CARD.md             # Hub 公開用のモデルカード（用途・評価・限界）
 ├── articles/                 # Zenn 記事本体（Markdown）
-│   ├── secom-defect-analysis.md  # 考察編
-│   └── secom-defect-serving.md   # 実装編
+│   ├── secom-defect-analysis.md   # 考察編
+│   ├── secom-defect-serving.md    # 実装編
+│   └── secom-defect-operations.md # 運用編（ドリフト監視）
 ├── images/                   # Zenn 記事用の画像（/images/... で参照）
-│   └── secom-defect-analysis/    # 考察編の図（fig1〜fig6）
+│   ├── secom-defect-analysis/     # 考察編の図（fig1〜fig6）
+│   └── secom-defect-operations/   # 運用編の図（fig7）
 ├── src/
 │   ├── preprocessing.py      # 前処理クラス（リーク防止 / 独立モジュール）
 │   ├── train.py              # 最終モデルの学習と保存
