@@ -30,7 +30,7 @@ DATA_PATH = os.path.join(ROOT, "data", "secom.data")
 LABELS_PATH = os.path.join(ROOT, "data", "secom_labels.data")
 MODELS_DIR = os.path.join(ROOT, "models")
 
-# 厳密評価（Nested CV）で得た真の実力値。ノートブックの分析結果をそのまま記録する。
+# 厳密評価（リーク排除した時系列CV）で得た真の実力値。ノートブックの分析結果をそのまま記録する。
 EVAL_AUC_STRICT = 0.6074
 EVAL_PR_AUC_STRICT = 0.1346
 
