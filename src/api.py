@@ -157,7 +157,7 @@ def health():
 
 @app.get("/metadata")
 def get_metadata():
-    """学習・評価時の情報。AUC などの値は厳密評価（Nested CV）の結果。"""
+    """学習・評価時の情報。AUC などの値は厳密評価（リーク排除した時系列CV）の結果。"""
     return metadata
 
 

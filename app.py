@@ -108,7 +108,7 @@ DESCRIPTION = f"""\
 推論 API（FastAPI）と同じ前処理・モデルを共有している。
 
 - モデル: **{metadata.get('model_type', '?')}** / version **{MODEL_VERSION}**（学習日時 {TRAINED_AT}）
-- 厳密評価（Nested CV・リーク排除）: **AUC {metadata.get('evaluation_AUC_strict', '?')}** /
+- 厳密評価（リーク排除した時系列CV）: **AUC {metadata.get('evaluation_AUC_strict', '?')}** /
   PR-AUC {metadata.get('evaluation_PR_AUC_strict', '?')}
 
 > 精度を競うものではなく、リークを排除した正直な評価と、再現可能なサービングを示すデモ。
