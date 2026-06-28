@@ -133,7 +133,7 @@ secom-defect-prediction/
 # 1. 依存パッケージ
 pip install -r requirements.txt
 
-# 2. モデルの学習（models/ に学習済みがあるので任意。data/ から再生成する場合のみ）
+# 2. モデルを再生成（推奨：同梱 pkl を load せず、data/ から学習し直す）
 python -m src.train
 
 # 3. API 起動 → http://localhost:8000/docs を開く
@@ -148,6 +148,8 @@ curl -X POST http://localhost:8000/predict \
 # 5. テスト
 pytest -q
 ```
+
+> **モデルファイルについて**: `models/*.pkl` は即試せるよう同梱しているが、pickle は load 時に任意コードを実行しうる。信頼できる出所からのみ load し、不安なら上記 `python -m src.train` で `data/` から再生成すれば、他人のバイナリを読まずに済む（CI でも push ごとに再生成して検証している）。
 
 ### ノートブックの再実行
 
