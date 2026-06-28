@@ -1,3 +1,15 @@
+---
+title: SECOM 不良予測デモ
+emoji: 🏭
+colorFrom: blue
+colorTo: gray
+sdk: gradio
+sdk_version: 6.19.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # SECOM 不良予測 ― データを読み解き、運用可能な形にするまで
 
 半導体製造ラインのセンサーデータ（[UCI SECOM データセット](https://archive.ics.uci.edu/dataset/179/secom)）を題材に、**データリークを排除した厳密な分析**を行い、その結論を再現可能な推論サービス(FastAPI + Docker)としてまとめたプロジェクト。
@@ -184,20 +196,15 @@ python app.py
 
 [Hugging Face Spaces](https://huggingface.co/spaces) を **SDK: Gradio** で新規作成し、
 Space リポジトリに本リポジトリの内容（`app.py` / `src/` / `models/` / `data/` /
-`requirements.txt`）を push する。Space の `README.md` 冒頭に次の front-matter を置く:
+`requirements.txt`）を push する。Space に必要な front-matter は、**この `README.md`
+冒頭にあらかじめ含めてある**（`sdk: gradio` / `app_file: app.py`）。そのまま push すれば
+Space 側がこの設定を読み取って Gradio アプリとして起動する。
 
-```yaml
----
-title: SECOM 不良予測デモ
-emoji: 🏭
-colorFrom: blue
-colorTo: gray
-sdk: gradio
-app_file: app.py
-pinned: false
-license: mit
----
-```
+> **注意**: 本リポジトリには FastAPI 用の `Dockerfile` も含まれるが、front-matter で
+> `sdk: gradio` を指定しているため Spaces は `Dockerfile` を無視し `app.py` を起動する。
+> front-matter が欠けた `README.md` で上書きすると、Spaces が SDK を判別できず（または
+> `Dockerfile` を Docker Space と誤認して 8000 番ポートの FastAPI を起動し、Spaces が
+> 期待する 7860 番に繋がらず）「接続できない」状態になるので、冒頭の front-matter は消さないこと。
 
 `data/`（約 5MB）を含めると「データから例を選んで推論」タブが使える。除外した場合は
 「JSON をアップロードして推論」タブのみ動作する。
