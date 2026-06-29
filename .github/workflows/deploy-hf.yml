@@ -1,0 +1,35 @@
+name: Deploy to Hugging Face Spaces
+
+# main への push、または手動実行で Hugging Face Space へミラーする。
+# GitHub のコミット内容（app.py / src/ / models/ / data/ / requirements.txt /
+# front-matter 付き README.md）がそのまま Space に反映される。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 全履歴を取得（Space へ force push するため）
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          # デプロイ先 Space。リポジトリ変数 HF_SPACE があれば優先、無ければ既定値。
+          HF_SPACE: ${{ vars.HF_SPACE || 'yuya-h/secom-defect-prediction' }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::HF_TOKEN secret が未設定です。GitHub の Settings → Secrets and variables → Actions に write 権限の HF トークンを HF_TOKEN として登録してください。"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 認証付き URL で Space の main を現在の HEAD で上書きする。
+          git push --force \
+            "https://github-actions:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}.git" \
+            HEAD:main
