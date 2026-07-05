@@ -105,7 +105,7 @@ from src.preprocessing import SecomPreprocessor
 
 ```text
 ┌────────────────────────────┐            ┌────────────────────────────┐
-│ train.py（学習プロセス）   │            │ api.py（別プロセス）       │
+│ train.py(学習プロセス)     │            │ api.py(別プロセス)         │
 │                            │            │                            │
 │ from src.preprocessing     │            │ from src.preprocessing     │
 │   import SecomPreprocessor │            │   import SecomPreprocessor │
