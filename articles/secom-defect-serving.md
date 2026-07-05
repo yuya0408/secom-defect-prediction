@@ -111,17 +111,17 @@ from src.preprocessing import SecomPreprocessor
 │   import SecomPreprocessor │            │   import SecomPreprocessor │
 │                            │            │                            │
 │ preprocessor.fit(訓練data) │            │ joblib.load(               │
-│   → 削除列・中央値を確定   │            │   "preprocessor.pkl")      │
-│                            │            │   → fit済みの状態を復元    │
+│   -> 削除列・中央値を確定  │            │   "preprocessor.pkl")      │
+│                            │            │   -> fit済みの状態を復元   │
 │ joblib.dump(...)           │            │                            │
-└───────────┬────────────────┘            └───────────▲────────────────┘
+└───────────┬────────────────┘            └───────────^────────────────┘
             │                                         │
             │   preprocessor.pkl                      │
             │   ┌────────────────────────┐            │
-            └──▶│ ① fit済みの中身        │────────────┘
+            └──>│ ① fit済みの中身       │────────────┘
                 │   (keep_cols_,         │
-                │    median_values_ …)   │
-                │ ② クラスのパス         │
+                │    median_values_ ...) │
+                │ ② クラスのパス        │
                 │   "src.preprocessing   │
                 │    .SecomPreprocessor" │
                 └────────────────────────┘
