@@ -104,27 +104,27 @@ from src.preprocessing import SecomPreprocessor
 学習プロセスとAPIプロセスの関係を図にするとこうなる。鍵は、保存される pkl に「① fit済みの中身」と「②クラスのパス」の両方が入っており、両プロセスが同じ import パスを共有しているからこそ②をたどってクラスを復元できる、という点だ。
 
 ```text
-┌───────────────────────┐          ┌───────────────────────┐
-│ train.py（学習プロセス）     │          │ api.py（別プロセス）        │
-│                          │          │                          │
-│ from src.preprocessing   │          │ from src.preprocessing   │
-│   import SecomPreprocessor│          │   import SecomPreprocessor│
-│                          │          │                          │
-│ preprocessor.fit(訓練data)│          │ joblib.load(             │
-│   → 削除列・中央値を確定   │          │   "preprocessor.pkl")    │
-│                          │          │   → fit済みの状態を復元   │
-│ joblib.dump(...)         │          │                          │
-└───────────┬───────────┘          └───────────▲───────────┘
-            │                                    │
-            │   preprocessor.pkl                 │
-            │   ┌──────────────────────┐         │
-            └──▶│ ① fit済みの中身          │─────────┘
-                │   (keep_cols_,        │
-                │    median_values_ …)  │
-                │ ② クラスのパス          │
-                │   "src.preprocessing  │
-                │    .SecomPreprocessor"│
-                └──────────────────────┘
+┌────────────────────────────┐            ┌────────────────────────────┐
+│ train.py（学習プロセス）   │            │ api.py（別プロセス）       │
+│                            │            │                            │
+│ from src.preprocessing     │            │ from src.preprocessing     │
+│   import SecomPreprocessor │            │   import SecomPreprocessor │
+│                            │            │                            │
+│ preprocessor.fit(訓練data) │            │ joblib.load(               │
+│   → 削除列・中央値を確定   │            │   "preprocessor.pkl")      │
+│                            │            │   → fit済みの状態を復元    │
+│ joblib.dump(...)           │            │                            │
+└───────────┬────────────────┘            └───────────▲────────────────┘
+            │                                         │
+            │   preprocessor.pkl                      │
+            │   ┌────────────────────────┐            │
+            └──▶│ ① fit済みの中身        │────────────┘
+                │   (keep_cols_,         │
+                │    median_values_ …)   │
+                │ ② クラスのパス         │
+                │   "src.preprocessing   │
+                │    .SecomPreprocessor" │
+                └────────────────────────┘
        同じ import パスだから、②をたどってクラスを復元できる
 ```
 
