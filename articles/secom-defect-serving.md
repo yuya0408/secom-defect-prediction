@@ -103,29 +103,22 @@ from src.preprocessing import SecomPreprocessor
 
 学習プロセスとAPIプロセスの関係を図にするとこうなる。鍵は、保存される pkl に「① fit済みの中身」と「②クラスのパス」の両方が入っており、両プロセスが同じ import パスを共有しているからこそ②をたどってクラスを復元できる、という点だ。
 
-```text
-┌────────────────────────────┐            ┌────────────────────────────┐
-│ train.py(学習プロセス)     │            │ api.py(別プロセス)         │
-│                            │            │                            │
-│ from src.preprocessing     │            │ from src.preprocessing     │
-│   import SecomPreprocessor │            │   import SecomPreprocessor │
-│                            │            │                            │
-│ preprocessor.fit(訓練data) │            │ joblib.load(               │
-│   -> 削除列・中央値を確定  │            │   "preprocessor.pkl")      │
-│                            │            │   -> fit済みの状態を復元   │
-│ joblib.dump(...)           │            │                            │
-└───────────┬────────────────┘            └───────────^────────────────┘
-            │                                         │
-            │   preprocessor.pkl                      │
-            │   ┌────────────────────────┐            │
-            └──>│ ① fit済みの中身       │────────────┘
-                │   (keep_cols_,         │
-                │    median_values_ ...) │
-                │ ② クラスのパス        │
-                │   "src.preprocessing   │
-                │    .SecomPreprocessor" │
-                └────────────────────────┘
-       同じ import パスだから、②をたどってクラスを復元できる
+```mermaid
+flowchart LR
+  subgraph train["train.py（学習プロセス）"]
+    t1["from src.preprocessing<br/>import SecomPreprocessor"]
+    t2["preprocessor.fit(訓練data)<br/>→ 削除列・中央値を確定"]
+    t3["joblib.dump(...)"]
+    t1 --> t2 --> t3
+  end
+  pkl[("preprocessor.pkl<br/><br/>① fit済みの中身<br/>（keep_cols_, median_values_ …）<br/>② クラスのパス<br/>「src.preprocessing.SecomPreprocessor」")]
+  subgraph api["api.py（別プロセス）"]
+    a1["from src.preprocessing<br/>import SecomPreprocessor"]
+    a2["joblib.load(preprocessor.pkl)<br/>→ fit済みの状態を復元"]
+    a1 --> a2
+  end
+  t3 -->|保存| pkl
+  pkl -->|"読み込み（②のパスをたどってクラスを復元）"| a2
 ```
 
 ---
