@@ -3,13 +3,13 @@ title: "機械学習モデルは静かに古びる ― 半導体不良予測の�
 emoji: "📡"
 type: "tech"
 topics: ["python", "mlops", "機械学習", "製造業", "監視"]
-published: false
+published: true
 ---
 
 これは、半導体製造データ SECOM を題材にした不良予測プロジェクトの記録の3本目、「運用編」である。同じ1つのプロジェクトを、3つの角度から書いている。
 
-- **考察編**（[記事](https://github.com/yuya0408/secom-defect-prediction/blob/main/articles/secom-defect-analysis.md)）― このデータが何を物語っているかを読み解く話
-- **実装編**（[記事](https://github.com/yuya0408/secom-defect-prediction/blob/main/articles/secom-defect-serving.md)）― 分析結果を API・コンテナとして動かせる形にする話
+- **考察編**（[記事](https://zenn.dev/yuya0408/articles/secom-defect-analysis)）― このデータが何を物語っているかを読み解く話
+- **実装編**（[記事](https://zenn.dev/yuya0408/articles/secom-defect-serving)）― 分析結果を API・コンテナとして動かせる形にする話
 - **運用編（本記事）**― 動かし続けるために何を監視し、異常を見つけたらどう動くかの話
 
 3本は同じプロジェクトの別の顔だが、本記事は単独でも追えるように、前提となる発見は本文中で簡単に補っている。
