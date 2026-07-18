@@ -8,11 +8,11 @@
 
 | 記事 | 主軸 | 記事ファイル | 対応するコード |
 |------|------|------|------|
-| **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
-| **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
-| **運用編**（Zenn: リンクは公開後に追記） | 動かし続けるための監視。ドリフト検知と再学習の線引き | [`articles/secom-defect-operations.md`](articles/secom-defect-operations.md) | `src/monitoring.py`, `scripts/replay_drift.py` |
+| **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
+| **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
+| **運用編**（Zenn: リンクは公開後に追記） | 動かし続けるための監視。ドリフト検知と再学習の線引き | [`articles/secom-defect-operations.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-operations.md) | `src/monitoring.py`, `scripts/replay_drift.py` |
 
-> 記事本体は `articles/` に Markdown で置いている（図は `images/`）。Zenn で公開予定。
+> 記事本体は Zenn 記事管理リポジトリ [zenn-content](https://github.com/yuya0408/zenn-content) の `articles/` に移した（図は同リポジトリの `images/`）。Zenn の GitHub 連携先はそちら。このリポジトリには分析・実装のコードだけを置く。
 
 > 予測精度を競うプロジェクトではない。「精度に限界のあるモデルでも、誰でも同じ結果を再現できる状態にする」までの一連の流れを示すことが目的。
 
@@ -97,13 +97,6 @@ secom-defect-prediction/
 ├── sample_input.json         # API 動作確認用のサンプル（実データの不良行 1 件）
 ├── app.py                    # Gradio デモ（Hugging Face Spaces 用）
 ├── MODEL_CARD.md             # Hub 公開用のモデルカード（用途・評価・限界）
-├── articles/                 # Zenn 記事本体（Markdown）
-│   ├── secom-defect-analysis.md   # 考察編
-│   ├── secom-defect-serving.md    # 実装編
-│   └── secom-defect-operations.md # 運用編（ドリフト監視）
-├── images/                   # Zenn 記事用の画像（/images/... で参照）
-│   ├── secom-defect-analysis/     # 考察編の図（fig1〜fig6）
-│   └── secom-defect-operations/   # 運用編の図（fig7）
 ├── src/
 │   ├── preprocessing.py      # 前処理クラス（リーク防止 / 独立モジュール）
 │   ├── train.py              # 最終モデルの学習と保存
@@ -123,7 +116,7 @@ secom-defect-prediction/
 └── .github/workflows/ci.yml  # 学習 → テストの CI
 ```
 
-> `reports/figures/` は分析（ノートブック）が生成する図の置き場、`images/secom-defect-analysis/` は Zenn 記事が参照する同じ図のコピー。図を更新したら両方に反映する。
+> `reports/figures/` は分析（ノートブック）が生成する図の置き場。Zenn 記事が参照する画像は [zenn-content](https://github.com/yuya0408/zenn-content) の `images/` にコピーしている。図を更新したら両方に反映する。
 
 ---
 
