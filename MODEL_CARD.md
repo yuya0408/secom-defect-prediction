@@ -59,3 +59,4 @@ metrics:
 
 - コード/モデル: MIT License
 - データ: McCann, M. & Johnston, A. (2008). *SECOM* [Dataset]. UCI Machine Learning Repository.
+<!-- gbrain: [Source: User, モデルカード作成, 2026-06-29] -->
