@@ -8,9 +8,9 @@
 
 | 記事 | 主軸 | 記事ファイル | 対応するコード |
 |------|------|------|------|
-| **考察編**（Zenn: リンクは公開後に追記） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
-| **実装編**（Zenn: リンクは公開後に追記） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
-| **運用編**（Zenn: リンクは公開後に追記） | 動かし続けるための監視。ドリフト検知と再学習の線引き | [`articles/secom-defect-operations.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-operations.md) | `src/monitoring.py`, `scripts/replay_drift.py` |
+| **考察編**（[Zenn](https://zenn.dev/yuya0408/articles/secom-defect-analysis)） | データをどう読むか。厳密な評価で何が分かったか | [`articles/secom-defect-analysis.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-analysis.md) | `notebooks/`, `reports/figures/` |
+| **実装編**（[Zenn](https://zenn.dev/yuya0408/articles/secom-defect-serving)） | 分析結果をどう運用可能な形にするか。API 化・コンテナ化・再現性 | [`articles/secom-defect-serving.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-serving.md) | `src/`, `models/`, `Dockerfile` |
+| **運用編**（[Zenn](https://zenn.dev/yuya0408/articles/secom-defect-operations)） | 動かし続けるための監視。ドリフト検知と再学習の線引き | [`articles/secom-defect-operations.md`](https://github.com/yuya0408/zenn-content/blob/main/articles/secom-defect-operations.md) | `src/monitoring.py`, `scripts/replay_drift.py` |
 
 > 記事本体は Zenn 記事管理リポジトリ [zenn-content](https://github.com/yuya0408/zenn-content) の `articles/` に移した（図は同リポジトリの `images/`）。Zenn の GitHub 連携先はそちら。このリポジトリには分析・実装のコードだけを置く。
 
