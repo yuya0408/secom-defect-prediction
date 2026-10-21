@@ -75,8 +75,11 @@ def build_model():
     )
 
 
-def time_series_oof(df, y, ts):
+def time_series_oof(df, y, ts, make_model=build_model):
     """時刻順に並べた時系列CVで、fold 内に閉じた前処理 + モデルの out-of-fold 予測を作る。
+
+    ``make_model`` を差し替えると、同じ分割・同じ前処理で別のモデルを評価できる
+    （scripts/compare_models.py）。
 
     最初の 1/(N_SPLITS+1) は学習専用で予測を持たないため、返すのはテスト側の行だけ。
     """
@@ -85,7 +88,7 @@ def time_series_oof(df, y, ts):
     proba, fold, test_idx = [], [], []
     for k, (tr, te) in enumerate(TimeSeriesSplit(N_SPLITS).split(X_all)):
         pre = SecomPreprocessor()
-        model = build_model().fit(pre.fit_transform(X_all.iloc[tr]), y_all[tr])
+        model = make_model().fit(pre.fit_transform(X_all.iloc[tr]), y_all[tr])
         proba.append(model.predict_proba(pre.transform(X_all.iloc[te]))[:, 1])
         fold.append(np.full(len(te), k))
         test_idx.append(te)
