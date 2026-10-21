@@ -58,6 +58,18 @@ def test_metadata():
     assert body.get("trained_at")
 
 
+def test_default_threshold_follows_recorded_rule():
+    """既定しきい値は時系列CVから決めた値で、決め方が metadata に残っていること。"""
+    body = client.get("/metadata").json()
+    rule = body["threshold_rule"]
+    assert 0.0 < rule["inspect_fraction"] < 1.0
+    assert rule["inspection_table"]
+    # 未知データの確率は 0.5 に届かない（時系列CVで最大 0.36）ため、0.5 に戻っていないこと。
+    assert body["default_threshold"] < 0.5
+    r = client.post("/predict", json={"features": _row(0)})
+    assert r.json()["threshold"] == body["default_threshold"]
+
+
 def test_prediction_carries_model_version():
     """予測レスポンスにモデル版が刻まれ、ログから出自を辿れること。"""
     y = _labels()
