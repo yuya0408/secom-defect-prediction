@@ -1,6 +1,11 @@
-# 推論 API と学習スクリプトの実行に必要なパッケージ。
+# 推論 API と学習スクリプト（src/）の実行に必要なパッケージ。Docker イメージはこれだけを入れる。
 # モデル（models/*.pkl）を生成した環境とバージョンを揃えることで、
 # joblib.load 時のバージョン不整合による警告・不具合を防ぐ。
+#
+# 役割ごとの分け方:
+#   requirements.txt         API・学習（本番）
+#   requirements-dev.txt     + テスト（CI はこれを入れる）
+#   requirements-extras.txt  + ノートブック・図の再生成・ローカルの Gradio デモ
 
 # --- 推論・学習のコア ---
 scikit-learn==1.8.0
@@ -13,10 +18,3 @@ joblib==1.5.3
 fastapi==0.136.3
 uvicorn[standard]==0.48.0
 pydantic==2.13.4
-httpx==0.28.1
-
-# --- ノートブックを再実行する場合のみ必要（API 実行には不要） ---
-matplotlib==3.10.8
-
-# --- Gradio デモ / Hugging Face Spaces 用（API 実行には不要） ---
-gradio==6.19.0

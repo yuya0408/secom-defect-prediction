@@ -91,7 +91,9 @@
 ```
 secom-defect-prediction/
 ├── README.md
-├── requirements.txt          # 学習・推論を再現するための固定バージョン
+├── requirements.txt          # API・学習の依存（固定バージョン。Docker はこれだけ）
+├── requirements-dev.txt      # + テスト（CI が入れる）
+├── requirements-extras.txt   # + ノートブック・図の再生成・Gradio デモ
 ├── Dockerfile                # 推論 API のコンテナイメージ
 ├── docker-compose.yml        # ワンコマンド起動
 ├── sample_input.json         # API 動作確認用のサンプル（実データの不良行 1 件）
@@ -123,8 +125,9 @@ secom-defect-prediction/
 ## 再現手順
 
 ```bash
-# 1. 依存パッケージ
-pip install -r requirements.txt
+# 1. 依存パッケージ（テストまで回すなら requirements-dev.txt、
+#    ノートブックや Gradio デモも使うなら requirements-extras.txt）
+pip install -r requirements-dev.txt
 
 # 2. モデルを再生成（推奨：同梱 pkl を load せず、data/ から学習し直す）
 python -m src.train
@@ -172,6 +175,7 @@ curl http://localhost:8000/health
 
 ```bash
 # ローカルで起動 → http://localhost:7860
+pip install -r requirements-extras.txt
 python app.py
 ```
 
@@ -179,7 +183,7 @@ python app.py
 
 [Hugging Face Spaces](https://huggingface.co/spaces) を **SDK: Gradio** で新規作成し、
 Space リポジトリに本リポジトリの内容（`app.py` / `src/` / `models/` / `data/` /
-`requirements.txt`）を push する。Space の `README.md` 冒頭に次の front-matter を置く:
+`requirements.txt`。Gradio は Spaces の環境が用意する）を push する。Space の `README.md` 冒頭に次の front-matter を置く:
 
 ```yaml
 ---
