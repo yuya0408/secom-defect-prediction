@@ -7,10 +7,10 @@ RF は比較で選んだモデルではなく、「高次元・少サンプル�
 結果を見る前に決めた規則:
 - 相手のハイパラは既定値に ``class_weight="balanced"`` だけを足す（RF もチューニングしていない）。
   ロジスティック回帰は係数に罰則がかかるため標準化を入れる。
-- 指標は fold 別 AUC の平均。差（相手 − RF）の 95% 区間は、fold の中で不良・良品を
-  それぞれ復元抽出する対応のあるブートストラップで求める。
-- RF を替えるのは、区間が 0 をまたがず相手の方が良いときだけ。替えるとAPI・監視の基準・
-  文書をやり直す費用がかかるため、見分けられない差では替えない。
+- 指標は fold 別 AUC の平均。差（相手 − RF）は fold 別 DeLong 検定（scripts/auc_tests.py）で
+  検定し、2 つの比較に Holm 補正をかける。
+- RF を替えるのは、Holm 補正後の p < 0.05 で相手の方が良いときだけ。替えると API・監視の
+  基準・文書をやり直す費用がかかるため、見分けられない差では替えない。
 - 不良は 65 件しかなく検出力は低い。「差なし」は「同等」ではなく「見分けられない」と読む。
 
 使い方（リポジトリのルートで）::
@@ -32,10 +32,10 @@ from sklearn.metrics import roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+from scripts.auc_tests import compare_to_baseline, holm
 from src.train import ROOT, build_model, load_data, time_series_oof
 
-N_BOOT = 2000
-SEED = 0
+ALPHA = 0.05
 REPORT_PATH = os.path.join(ROOT, "reports", "model_comparison.md")
 
 CANDIDATES = {
@@ -48,24 +48,30 @@ CANDIDATES = {
 }
 
 
-def mean_fold_auc(proba, y, fold):
-    return float(np.mean([roc_auc_score(y[fold == k], proba[fold == k]) for k in np.unique(fold)]))
-
-
-def paired_bootstrap_diff(proba_a, proba_b, y, fold, n_boot=N_BOOT, seed=SEED):
-    """fold 別 AUC 平均の差（b − a）の分布。同じ行を両モデルで引くので対応がある。
-
-    fold の中で不良・良品を別々に復元抽出する。不良が数件しかない fold で、不良 0 件の
-    標本ができて AUC が計算できなくなるのを避けるため。
-    """
-    rng = np.random.default_rng(seed)
-    strata = [np.where((fold == k) & (y == c))[0] for k in np.unique(fold) for c in (0, 1)]
-    diffs = np.empty(n_boot)
-    for b in range(n_boot):
-        idx = np.concatenate([rng.choice(s, size=len(s), replace=True) for s in strata])
-        diffs[b] = (mean_fold_auc(proba_b[idx], y[idx], fold[idx])
-                    - mean_fold_auc(proba_a[idx], y[idx], fold[idx]))
-    return diffs
+def result_table(proba_by_name, baseline, y, fold, switch_label):
+    """基準との差の表（Markdown の行）。compare_configs からも使う。"""
+    tests = compare_to_baseline(proba_by_name, baseline, y, fold)
+    p_holm = dict(zip(tests, holm([t["p"] for t in tests.values()])))
+    lines = [
+        "| 構成 | AUC（fold 平均） | fold 別 | 基準との差 | 差の 95% 区間 | p | p（Holm） | 判定 |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for name, p in proba_by_name.items():
+        by_fold = [roc_auc_score(y[fold == k], p[fold == k]) for k in np.unique(fold)]
+        head = f"| {name} | {np.mean(by_fold):.4f} | {' / '.join(f'{a:.3f}' for a in by_fold)} |"
+        if name == baseline:
+            lines.append(head + " — | — | — | — | 基準 |")
+            continue
+        t = tests[name]
+        if p_holm[name] >= ALPHA:
+            verdict = "見分けられない"
+        elif t["diff"] > 0:
+            verdict = switch_label
+        else:
+            verdict = "基準より悪い"
+        lines.append(head + f" {t['diff']:+.4f} | [{t['ci_low']:+.4f}, {t['ci_high']:+.4f}] |"
+                     f" {t['p']:.3f} | {p_holm[name]:.3f} | {verdict} |")
+    return lines
 
 
 def main():
@@ -75,31 +81,19 @@ def main():
         print(f"評価中: {name}")
         oof[name] = time_series_oof(df, y, ts, make)
 
-    p_rf, y_oof, fold = oof["RandomForest"]
+    _, y_oof, fold = oof["RandomForest"]
+    for _, y_k, fold_k in oof.values():
+        assert np.array_equal(y_k, y_oof) and np.array_equal(fold_k, fold)
     lines = [
         "# モデルの比較（厳密な時系列CV）",
         "",
         "`python -m scripts.compare_models` で再生成。規則はスクリプト冒頭の docstring に、結果を見る前に記した。",
         "",
         f"評価対象: out-of-fold 予測 {len(y_oof)} 件（不良 {int(y_oof.sum())} 件）。"
-        f"差の区間は fold 内で層別した対応のあるブートストラップ（{N_BOOT} 回）。",
+        "差の検定は fold 別 DeLong 検定、多重比較は Holm 補正。",
         "",
-        "| モデル | AUC（fold 平均） | fold 別 | RF との差 | 差の 95% 区間 | 判定 |",
-        "|---|---|---|---|---|---|",
-    ]
-    for name, (p, y_k, fold_k) in oof.items():
-        assert np.array_equal(y_k, y_oof) and np.array_equal(fold_k, fold)
-        by_fold = [roc_auc_score(y_oof[fold == k], p[fold == k]) for k in np.unique(fold)]
-        by_fold_s = " / ".join(f"{a:.3f}" for a in by_fold)
-        if name == "RandomForest":
-            lines.append(f"| {name}（現行） | {np.mean(by_fold):.4f} | {by_fold_s} | — | — | 基準 |")
-            continue
-        diffs = paired_bootstrap_diff(p_rf, p, y_oof, fold)
-        lo, hi = np.quantile(diffs, [0.025, 0.975])
-        diff = np.mean(by_fold) - mean_fold_auc(p_rf, y_oof, fold)
-        verdict = "RF を替える" if lo > 0 else "替えない（RF より良いとは見分けられない）"
-        lines.append(f"| {name} | {np.mean(by_fold):.4f} | {by_fold_s} | {diff:+.4f} | "
-                     f"[{lo:+.4f}, {hi:+.4f}] | {verdict} |")
+    ] + result_table({n: o[0] for n, o in oof.items()}, "RandomForest", y_oof, fold,
+                     switch_label="RF を替える")
 
     os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
     with open(REPORT_PATH, "w", encoding="utf-8", newline="\n") as f:
