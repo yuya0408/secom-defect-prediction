@@ -1,0 +1,7 @@
+# ノートブックの再実行・図の再生成（scripts/replay_drift.py ほか）・ローカルの Gradio デモ（app.py）用。
+# API の実行には不要。本番依存を取り込むので、これ一つで分析環境がそろう:
+#   pip install -r requirements-extras.txt
+-r requirements.txt
+
+matplotlib==3.10.8
+gradio==6.19.0
