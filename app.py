@@ -110,6 +110,9 @@ DESCRIPTION = f"""\
 - モデル: **{metadata.get('model_type', '?')}** / version **{MODEL_VERSION}**（学習日時 {TRAINED_AT}）
 - 厳密評価（リーク排除した時系列CV）: **AUC {metadata.get('evaluation_AUC_strict', '?')}** /
   PR-AUC {metadata.get('evaluation_PR_AUC_strict', '?')}
+- 既定しきい値 {DEFAULT_THRESHOLD}: 規則「{metadata.get('threshold_rule', {}).get('rule', '?')}」から決めた値。
+  未知のデータに対する不良確率は最大でも 0.36 程度で、0.5 では 1 件も不良と判定されない
+- 「データから例を選んで推論」の行は学習に使った行なので、確率は未知のデータより高く出る
 
 > 精度を競うものではなく、リークを排除した正直な評価と、再現可能なサービングを示すデモ。
 > AUC は 0.6 台で実力には限界がある。事後検知の補助としての位置づけ。
@@ -118,7 +121,7 @@ DESCRIPTION = f"""\
 with gr.Blocks(title="SECOM 不良予測デモ") as demo:
     gr.Markdown(DESCRIPTION)
     threshold = gr.Slider(
-        0.0, 1.0, value=DEFAULT_THRESHOLD, step=0.01,
+        0.0, 1.0, value=DEFAULT_THRESHOLD, step=0.001,
         label="判定しきい値（これ以上の確率を不良と判定）",
     )
 
