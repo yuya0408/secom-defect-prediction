@@ -32,7 +32,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import TimeSeriesSplit
 
-from scripts.compare_models import result_table
+from scripts.compare_models import conclusion_line, result_table
 from src.preprocessing import SecomPreprocessor
 from src.train import N_SPLITS, ROOT, build_model, load_data
 
@@ -108,15 +108,18 @@ def main():
         print(f"評価中: {name}")
         proba[name], y_oof, fold = config_oof(df, y, datetimes, **kwargs)
 
+    table = result_table(proba, BASELINE, y_oof, fold, switch_label="C より良い")
     lines = [
         "# 前処理・特徴量の構成の比較（厳密な時系列CV、モデルは RF）",
+        "",
+        conclusion_line(table),
         "",
         "`python -m scripts.compare_configs` で再生成。規則はスクリプト冒頭の docstring に、結果を見る前に記した。",
         "",
         f"評価対象: out-of-fold 予測 {len(y_oof)} 件（不良 {int(y_oof.sum())} 件）。"
-        "基準 C との差を fold 別 DeLong 検定で検定し、5 つの比較に Holm 補正。",
+        "基準 C との差を fold 別 DeLong 検定で検定し、5 つの比較に Holm 補正。差の 95% 区間は補正前。",
         "",
-    ] + result_table(proba, BASELINE, y_oof, fold, switch_label="C より良い")
+    ] + table
 
     os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
     with open(REPORT_PATH, "w", encoding="utf-8", newline="\n") as f:

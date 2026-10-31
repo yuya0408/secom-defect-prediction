@@ -64,6 +64,9 @@ def test_default_threshold_follows_recorded_rule():
     rule = body["threshold_rule"]
     assert 0.0 < rule["inspect_fraction"] < 1.0
     assert rule["inspection_table"]
+    # 費用の前提（r=20）では、全数検査より上位 50% の検査の方が安いこと。
+    assert rule["full_inspection_beats_rule_from_r"] > 20
+    assert rule["full_inspection_cheapest_from_r"] > 20
     # 未知データの確率は 0.5 に届かない（時系列CVで最大 0.36）ため、0.5 に戻っていないこと。
     assert body["default_threshold"] < 0.5
     r = client.post("/predict", json={"features": _row(0)})

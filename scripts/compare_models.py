@@ -74,6 +74,15 @@ def result_table(proba_by_name, baseline, y, fold, switch_label):
     return lines
 
 
+def conclusion_line(table_lines):
+    """表の判定列から、レポート冒頭に置く結論の 1 行を作る。"""
+    rows = [l for l in table_lines[2:] if not l.endswith("基準 |")]
+    n_undistinguished = sum(l.endswith("見分けられない |") for l in rows)
+    if n_undistinguished == len(rows):
+        return f"**結論: {len(rows)} つの比較のどれも、基準と見分けられない（Holm 補正後 p ≥ {ALPHA}）。「同等」という意味ではない。**"
+    return f"**結論: {len(rows)} つの比較のうち {len(rows) - n_undistinguished} つで基準との差を検出した（表の判定列）。**"
+
+
 def main():
     df, y, ts = load_data()
     oof = {"RandomForest": time_series_oof(df, y, ts, build_model)}
@@ -84,16 +93,19 @@ def main():
     _, y_oof, fold = oof["RandomForest"]
     for _, y_k, fold_k in oof.values():
         assert np.array_equal(y_k, y_oof) and np.array_equal(fold_k, fold)
+    table = result_table({n: o[0] for n, o in oof.items()}, "RandomForest", y_oof, fold,
+                         switch_label="RF を替える")
     lines = [
         "# モデルの比較（厳密な時系列CV）",
+        "",
+        conclusion_line(table),
         "",
         "`python -m scripts.compare_models` で再生成。規則はスクリプト冒頭の docstring に、結果を見る前に記した。",
         "",
         f"評価対象: out-of-fold 予測 {len(y_oof)} 件（不良 {int(y_oof.sum())} 件）。"
-        "差の検定は fold 別 DeLong 検定、多重比較は Holm 補正。",
+        "差の検定は fold 別 DeLong 検定、多重比較は Holm 補正。差の 95% 区間は補正前。",
         "",
-    ] + result_table({n: o[0] for n, o in oof.items()}, "RandomForest", y_oof, fold,
-                     switch_label="RF を替える")
+    ] + table
 
     os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
     with open(REPORT_PATH, "w", encoding="utf-8", newline="\n") as f:
