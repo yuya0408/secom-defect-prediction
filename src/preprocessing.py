@@ -27,7 +27,7 @@ class SecomPreprocessor(BaseEstimator, TransformerMixin):
     """SECOM 用の前処理クラス（データリーク防止）。
 
     ``fit()`` で訓練データから削除列・補完値などを学習し、``transform()`` で
-    新しいデータに適用する。学習時の統計量だけを使うため、評価時にも本番運用時にも
+    新しいデータに適用する。学習時の統計量だけを使うため、評価時にも推論時にも
     テストデータの情報が漏れ込まない（リークしない）。
 
     Parameters

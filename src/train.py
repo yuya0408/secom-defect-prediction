@@ -41,10 +41,12 @@ N_SPLITS = 5
 # 業務上の仮定であり、データから一意に決まる値ではない。
 # - 確率の値ではなく割合で決めるのは、学習データが増えるほど確率が低く出て
 #   （fold ごとの平均 0.15 → 0.07）、値で固定したしきい値は再現率が大きく振れるため。
-# - 50% は「流出1件の損失が検査1件の約20倍」の想定で費用最小に近く、fold 間の再現率の
-#   ばらつきも最小だった。流出の損失がそれより大きい（約50倍以上）現場では全数検査の方が
-#   安く、このモデルは検査の優先順位づけにしか使えない。
+# - 50% は検査割合ごとの再現率の表を見た後に選んだ。1 個あたりの費用を
+#   「検査割合 + r × 不良率 × 見逃し率」（r = 流出1件の損失 ÷ 検査1件の費用）とすると、
+#   r=20 で 10% 刻みの候補のうち最小になる。ただし最適な割合は r で大きく動く。
+#   全数検査との損益分岐は cost_breakeven() が計算して metadata に記録する。
 INSPECT_FRACTION = 0.5
+ASSUMED_COST_RATIO = 20
 
 # 評価表に載せる検査割合の刻み。
 INSPECT_FRACTIONS_REPORTED = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
@@ -122,6 +124,26 @@ def inspection_table(proba, y, fold):
     return rows
 
 
+def cost_breakeven(proba, y, fold):
+    """全数検査の費用（1 個あたり 1）との損益分岐になる r を返す。
+
+    費用 = 検査割合 + r × 不良率 × 見逃し率。検査割合は 1% 刻みで調べる。
+    """
+    grid = np.arange(0, 101) / 100
+    miss = np.array([
+        1.0 if q == 0 else 1 - (flag_top(proba, fold, q) & (y == 1)).sum() / (y == 1).sum()
+        for q in grid
+    ])
+    rate = y.mean()
+    rule_miss = miss[int(round(INSPECT_FRACTION * 100))]
+    rs = np.arange(1, 501)
+    best = [grid[np.argmin(grid + r * rate * miss)] for r in rs]
+    return {
+        "full_inspection_beats_rule_from_r": int(rs[(INSPECT_FRACTION + rs * rate * rule_miss) > 1][0]),
+        "full_inspection_cheapest_from_r": int(rs[np.array(best) == 1.0][0]),
+    }
+
+
 def main():
     df, y, ts = load_data()
     print(f"データ読み込み: {df.shape}  不良率 {y.mean() * 100:.2f}%")
@@ -144,8 +166,10 @@ def main():
     last = oof_fold == folds[-1]
     default_threshold = float(np.quantile(oof_proba[last], 1 - INSPECT_FRACTION))
     print(f"既定しきい値: {default_threshold:.4f}（最後の fold で上位{INSPECT_FRACTION:.0%}に当たる値）")
+    breakeven = cost_breakeven(oof_proba, oof_y, oof_fold)
+    print(f"損益分岐: {breakeven}")
 
-    # 全データで前処理とモデルを学習（本番デプロイ用の最終モデル）
+    # 全データで前処理とモデルを学習（API とデモが読み込む最終モデル）
     preprocessor = SecomPreprocessor()
     X = preprocessor.fit_transform(df)
     print("前処理サマリー:", preprocessor.fit_summary_)
@@ -172,7 +196,12 @@ def main():
         "threshold_rule": {
             "rule": f"不良確率の上位{INSPECT_FRACTION:.0%}を検査に回す",
             "inspect_fraction": INSPECT_FRACTION,
-            "assumption": "流出1件の損失が検査1件の約20倍。約50倍以上なら全数検査の方が安い",
+            "assumption": (
+                f"流出1件の損失が検査1件の約{ASSUMED_COST_RATIO}倍。"
+                f"約{breakeven['full_inspection_beats_rule_from_r']}倍で上位{INSPECT_FRACTION:.0%}の検査は全数検査より高くつき、"
+                f"約{breakeven['full_inspection_cheapest_from_r']}倍からはどの割合より全数検査が安い"
+            ),
+            **breakeven,
             "source": "時系列CVの最後の fold の out-of-fold 予測の分位点（最終モデルに対しては近似）",
             "inspection_table": table,
         },
