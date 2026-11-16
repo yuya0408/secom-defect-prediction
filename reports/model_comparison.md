@@ -2,7 +2,7 @@
 
 **結論: 2 つの比較のどれも、基準と見分けられない（Holm 補正後 p ≥ 0.05）。「同等」という意味ではない。**
 
-`python -m scripts.compare_models` で再生成。規則はスクリプト冒頭の docstring に、結果を見る前に記した。
+`python -m scripts.compare_models` で再生成。判定の規則はスクリプト冒頭の docstring にある。
 
 評価対象: out-of-fold 予測 1305 件（不良 65 件）。差の検定は fold 別 DeLong 検定、多重比較は Holm 補正。差の 95% 区間は補正前。
 
