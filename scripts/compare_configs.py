@@ -2,7 +2,7 @@
 
 考察編 §4 とノートブック（notebooks/secom_strict_analysis.ipynb の Step 5）の 6 構成を、
 同じ厳密な時系列CVで評価し直し、現行の C（きちんとした前処理のみ）との差を検定する。
-ノートブックは平均 AUC の並びだけで「C が最良」としていたが、差の検定はしていなかった。
+考察編とノートブックは差を検定せずに C を採っていた（平均 AUC は E-100 の 0.6108 が C の 0.6074 より高い）。
 
 構成の定義はノートブックの ``evaluate_strict`` / ``make_time_features`` をそのまま移した:
 - A: 雑な前処理（定数列の削除 + 中央値補完）のみ
@@ -11,7 +11,7 @@
 - D: C + 時系列特徴量（時刻・生産順・直前 1/3/5/10 件の不良数・前の品からの間隔）
 - E-50 / E-100: D + 特徴量選択（訓練データの RF 重要度の上位 50 / 100 列）
 
-結果を見る前に決めた規則:
+判定の規則:
 - 差（構成 − C）は fold 別 DeLong 検定（scripts/auc_tests.py）、5 つの比較に Holm 補正。
 - Holm 補正後の p < 0.05 でなければ「見分けられない」とし、「C が最良」とは書かない。
 
@@ -114,7 +114,7 @@ def main():
         "",
         conclusion_line(table),
         "",
-        "`python -m scripts.compare_configs` で再生成。規則はスクリプト冒頭の docstring に、結果を見る前に記した。",
+        "`python -m scripts.compare_configs` で再生成。判定の規則はスクリプト冒頭の docstring にある。",
         "",
         f"評価対象: out-of-fold 予測 {len(y_oof)} 件（不良 {int(y_oof.sum())} 件）。"
         "基準 C との差を fold 別 DeLong 検定で検定し、5 つの比較に Holm 補正。差の 95% 区間は補正前。",
