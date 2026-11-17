@@ -4,7 +4,6 @@ library_name: sklearn
 tags:
   - tabular-classification
   - manufacturing
-  - anomaly-detection
   - secom
 metrics:
   - roc_auc
@@ -75,4 +74,3 @@ fold 別 DeLong 検定 + Holm 補正で有意な差は無かった（`reports/mo
 
 - コード/モデル: MIT License
 - データ: McCann, M. & Johnston, A. (2008). *SECOM* [Dataset]. UCI Machine Learning Repository.
-<!-- gbrain: [Source: User, モデルカード作成, 2026-06-29] -->
